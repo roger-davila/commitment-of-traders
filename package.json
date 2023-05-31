@@ -1,0 +1,22 @@
+{
+  "name": "commitment-of-traders",
+  "version": "1.0.0",
+  "description": "Google Apps Script script for tracking commitment of traders data on a Google Sheet",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/roger-davila/commitment-of-traders.git"
+  },
+  "author": "Roger Davila",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/roger-davila/commitment-of-traders/issues"
+  },
+  "homepage": "https://github.com/roger-davila/commitment-of-traders#readme",
+  "dependencies": {
+    "@types/google-apps-script": "^1.0.64"
+  }
+}
