@@ -1,4 +1,4 @@
-type CommitmentOfTradersReport {
+type CommitmentOfTradersReport = {
   marketAndExchangeNames: string;
   asofDateinFormYYMMDD: string;
   asofDateinFormYYYYMMDD: string;
