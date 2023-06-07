@@ -1,3 +1,65 @@
+/** Get weekly data for the specified indices
+ * 
+ * @param {string} url Endpoint for HTTP GET request
+ * @param {string[]} indices List of indices to get data for
+ * @returns void
+ */
+function getWeeklyData(url: string, indices?: string[]): void {
+  const dataBlob: GoogleAppsScript.Base.Blob | void = sendRequest(url);
+  if (dataBlob) {
+    const weeklyData = dataBlob.getDataAsString().split('\n').map((report) => report.split(','));
+    // Logger.log(weeklyData);
+  }
+}
+
+/** Get all data for the specified indices
+ * 
+ * @param {string} url Endpoint for HTTP GET request
+ * @param {string[]} indices List of indices to get data for
+ * @returns void
+ */
+function getAllData(url: string, indices?: string[]) : void {
+  const dataBlob: GoogleAppsScript.Base.Blob | void = sendRequest(url);
+  if (dataBlob) {
+    const historicalData: string[] = Utilities.unzip(dataBlob)[0].getDataAsString().split('\n');
+    let headers: string[] = historicalData[0].split(',');
+    headers = parseColumnHeaders(headers);
+    const cotReports: string[][] = historicalData.slice(1).map((report) => report.split(','));
+    Logger.log(processCOTReports(cotReports, headers));
+  }
+}
+
+function parseColumnHeaders(headers: string[]): string[] {
+  return headers.map((header) => {
+    header = header.trim().replace(/[()"]/g, '');
+    return header.split(/-| = |= | =| /).map((word, index) => {
+      if (word === '%' && index === 0) return 'percent';
+      else if (index === 0) return word.toLowerCase();
+      else return `${word.charAt(0).toUpperCase()}${word.slice(1)}`;
+    }).join('');
+  });
+}
+
+function processCOTReports(cotReports: string[][], columnHeaders: string[]): CommitmentOfTradersReport[] {
+  const processedCOTReports: CommitmentOfTradersReport[] = cotReports.reduce((reports: CommitmentOfTradersReport[], report) => {
+    if (report.length != columnHeaders.length) return reports;
+    else {
+      const cotReport: CommitmentOfTradersReport = <any>{};
+      report.forEach((entry, index) => {
+        cotReport[`${columnHeaders[index]}`] = entry.trim();
+      });
+      reports.push(cotReport);
+      return reports;
+    }
+  }, []);
+  return processedCOTReports;
+}
+
+function test() {
+  getWeeklyData(Constants.URL_WEEKLY_DATA);
+  getAllData(Constants.URL_HISTORICAL_DATA);
+}
+
 type CommitmentOfTradersReport = {
   marketAndExchangeNames: string;
   asOfDateInFormYYMMDD: string;
@@ -128,47 +190,4 @@ type CommitmentOfTradersReport = {
   cftcContractMarketCodeQuotes: string;
   cftcMarketCodeInInitialsQuotes: string;
   cftcCommodityCodeQuotes: string;
-}
-
-
-/** Get weekly data for the specified indices
- * 
- * @param {string} url Endpoint for HTTP GET request
- * @param {string[]} indices List of indices to get data for
- * @returns void
- */
-function getWeeklyData(url: string, indices?: string[]): void {
-  const dataBlob: GoogleAppsScript.Base.Blob | void = sendRequest(url);
-  if (dataBlob) {
-    const weeklyData = dataBlob.getDataAsString();
-  }
-}
-
-/** Get all data for the specified indices
- * 
- * @param {string} url Endpoint for HTTP GET request
- * @param {string[]} indices List of indices to get data for
- * @returns void
- */
-function getAllData(url: string, indices?: string[]) : void {
-  const dataBlob: GoogleAppsScript.Base.Blob | void = sendRequest(url);
-  if (dataBlob) {
-    const historicalData = Utilities.unzip(dataBlob)[0].getDataAsString();
-  }
-}
-
-function test() {
-  getWeeklyData(Constants.URL_HISTORICAL_DATA);
-  getAllData(Constants.URL_HISTORICAL_DATA);
-}
-
-function parseColumnHeaders(headers: string[]): string[] {
-  return headers.map((header) => {
-    header = header.trim().replace(/[()]/g, '');
-    return header.split(/-| = |= | =| /).map((word, index) => {
-      if (word === '%' && index === 0) return 'percent';
-      else if (index === 0) return word.toLowerCase();
-      else return `${word.charAt(0).toUpperCase()}${word.slice(1)}`;
-    }).join('');
-  });
 }
