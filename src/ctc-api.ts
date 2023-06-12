@@ -22,10 +22,11 @@ function getAllData(url: string, indices?: string[]) : void {
   const dataBlob: GoogleAppsScript.Base.Blob | void = sendRequest(url);
   if (dataBlob) {
     const historicalData: string[] = Utilities.unzip(dataBlob)[0].getDataAsString().split('\n');
-    let headers: string[] = historicalData[0].split(',');
-    headers = parseColumnHeaders(headers);
+    const headers: string[] = historicalData[0].split(',');
+    const parsedHeaders = parseColumnHeaders(headers);
     const cotReports: string[][] = historicalData.slice(1).map((report) => report.split(','));
-    Logger.log(processCOTReports(cotReports, headers));
+    const processedCotReports = processCOTReports(cotReports, parsedHeaders);
+    Logger.log(processedCotReports);
   }
 }
 
@@ -41,18 +42,16 @@ function parseColumnHeaders(headers: string[]): string[] {
 }
 
 function processCOTReports(cotReports: string[][], columnHeaders: string[]): CommitmentOfTradersReport[] {
-  const processedCOTReports: CommitmentOfTradersReport[] = cotReports.reduce((reports: CommitmentOfTradersReport[], report) => {
+  return cotReports.reduce((reports, report) => {
     if (report.length != columnHeaders.length) return reports;
     else {
-      const cotReport: CommitmentOfTradersReport = <any>{};
-      report.forEach((entry, index) => {
-        cotReport[`${columnHeaders[index]}`] = entry.trim();
-      });
+      const cotReport: CommitmentOfTradersReport = report.reduce((cotReport, property, index) => {
+        return {...cotReport, [columnHeaders[index]]: property.trim()}
+      }, {} as CommitmentOfTradersReport);
       reports.push(cotReport);
       return reports;
     }
-  }, []);
-  return processedCOTReports;
+  }, [] as CommitmentOfTradersReport[]);
 }
 
 function test() {
