@@ -4,10 +4,9 @@
  * @param {string[]} indices List of indices to get data for
  * @returns void
  */
-function getWeeklyData(url: string, indices?: string[]): void {
-  const data: object[] | void = sendRequest(url);
-  if (data) Logger.log(data.length);
-    // Logger.log(weeklyData);
+function getWeeklyData(): object[] | void {
+  const data: object[] | void = sendRequest(Constants.URL_HISTORICAL_DATA_SOCRATA);
+  if (data) return data;
 }
 
 /** Get all data for the specified indices
@@ -17,9 +16,9 @@ function getWeeklyData(url: string, indices?: string[]): void {
  * @returns void
  */
 
-function getAllData(url: string): void {
-  const data: object[] | void = sendRequest(url);
-  if (data) Logger.log(data);
+function getAllData(): object[] | void {
+  const data: object[] | void = sendRequest(Constants.URL_HISTORICAL_DATA_SOCRATA);
+  if (data) return data;
 }
 
 function parseColumnHeaders(headers: string[]): string[] {
@@ -47,8 +46,8 @@ function processCOTReports(cotReports: string[][], columnHeaders: string[]): Com
 }
 
 function test() {
-  getWeeklyData(Constants.URL_HISTORICAL_DATA_SOCRATA);
-  getAllData(Constants.URL_HISTORICAL_DATA_SOCRATA);
+  getWeeklyData();
+  getAllData();
 }
 
 type CommitmentOfTradersReport = {
